@@ -7,6 +7,7 @@ import pygame as pg
 
 WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
+NUM_OF_BOMBS = 5 #爆弾の数
 
 
 def check_bound(area: pg.Rect, obj: pg.Rect) -> tuple[bool, bool]:
@@ -81,18 +82,22 @@ class Bomb:
     """
     爆弾に関するクラス
     """
-    def __init__(self, color: tuple[int, int, int], rad: int):
+    _colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
+    _dires = [-1, 0, +1]
+    def __init__(self):
         """
         引数に基づき爆弾円Surfaceを生成する
-        引数1 color：爆弾円の色タプル
-        引数2 rad：爆弾円の半径
+        #引数1 color：爆弾円の色タプル
+        #引数2 rad：爆弾円の半径
         """
+        rad = random.randint(10, 50)
+        color = random.choice(__class__._colors)
         self._img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self._img, color, (rad, rad), rad)
         self._img.set_colorkey((0, 0, 0))
         self._rct = self._img.get_rect()
         self._rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
-        self._vx, self._vy = +1, +1
+        self._vx, self._vy = random.choice(__class__._dires), random.choice(__class__._dires)
 
     def update(self, screen: pg.Surface):
         """
@@ -132,7 +137,6 @@ class Beam:
         ## 画面外に出たら生成したオブジェクトを削除する(オプション) ##
         if self._rct.left > WIDTH:
             del self
-        
 
 
 def main():
@@ -142,10 +146,10 @@ def main():
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
 
     bird = Bird(3, (900, 400))
-    bomb = Bomb((255, 0, 0), 10)
+    bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
     beam = None
 
-    tmr = 0
+    tmr = 0  
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -156,8 +160,7 @@ def main():
         tmr += 1
         screen.blit(bg_img, [0, 0])
         
-        
-        if bomb is not None:  # 爆弾が存在している場合
+        for bomb in bombs:
             bomb.update(screen)
             if bird._rct.colliderect(bomb._rct):    
                 # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -165,19 +168,19 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-            
-            
-            
+
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
 
         if beam is not None:  # ビームが生成されている場合
             beam.update(screen)
-            if bomb is not None and beam._rct.colliderect(bomb._rct):
-                # ビームが爆弾に当たったら，爆弾を消去する
-                beam = None
-                bomb = None
-                bird.change_img(6, screen)
+            for i, bomb in enumerate(bombs):
+                if beam._rct.colliderect(bomb._rct):
+                    # ビームが爆弾に当たったら，爆弾を消去する
+                    beam = None
+                    del bombs[i]
+                    bird.change_img(6, screen)
+                    break
 
         pg.display.update()
         clock.tick(1000)
