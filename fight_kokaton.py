@@ -134,6 +134,7 @@ class Beam:
             del self
         
 
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -150,10 +151,11 @@ def main():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                beam = Beam(bird)  # ビームにインスタンスを生成する
+                beam = Beam(bird)
         
         tmr += 1
         screen.blit(bg_img, [0, 0])
+        
         
         if bomb is not None:  # 爆弾が存在している場合
             bomb.update(screen)
@@ -163,7 +165,9 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-
+            
+            
+            
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
 
@@ -173,6 +177,7 @@ def main():
                 # ビームが爆弾に当たったら，爆弾を消去する
                 beam = None
                 bomb = None
+                bird.change_img(6, screen)
 
         pg.display.update()
         clock.tick(1000)
