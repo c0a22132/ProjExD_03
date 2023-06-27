@@ -41,14 +41,20 @@ class Bird:
         引数1 num：こうかとん画像ファイル名の番号
         引数2 xy：こうかとん画像の位置座標タプル
         """
-        self._img = pg.transform.flip(  # 左右反転
-            pg.transform.rotozoom(  # 2倍に拡大
-                pg.image.load(f"ex03/fig/{num}.png"), 
-                0, 
-                2.0), 
-            True, 
-            False
-        )
+        img0 = pg.transform.rotozoom(pg.image.load(f"ex03/fig/{num}.png"), 0, 2.0)  #左向き 2倍に拡大
+        img1 = pg.transform.flip(img0, True, False)  # 右向き 2倍に拡大
+        self._imgs = {
+            
+            (+1, 0):  img1,  # 右
+            (+1, -1): pg.transform.rotozoom(img1, 45, 1.0),  # 右上
+            (0, -1):  pg.transform.rotozoom(img1, 90, 1.0),  # 上
+            (-1, -1): pg.transform.rotozoom(img0, -45, 1.0),  # 左上
+            (-1, 0): img0,  # 左
+            (-1, +1): pg.transform.rotozoom(img0, 45, 1.0),  # 左下
+            (0, +1): pg.transform.rotozoom(img1, -90, 1.0),  # 下
+            (+1, +1): pg.transform.rotozoom(img1, -45, 1.0),  # 右下
+        }
+        self._img = self._imgs[(+1, 0)]  #初期方向右向き
         self._rct = self._img.get_rect()
         self._rct.center = xy
 
@@ -67,13 +73,19 @@ class Bird:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        sum_mv = [0, 0]
         for k, mv in __class__._delta.items():
             if key_lst[k]:
                 self._rct.move_ip(mv)
+                sum_mv[0] += mv[0]  # 横方向の移動量の合計
+                sum_mv[1] += mv[1]  # 縦方向の移動量の合計
+
         if check_bound(screen.get_rect(), self._rct) != (True, True):
             for k, mv in __class__._delta.items():
                 if key_lst[k]:
                     self._rct.move_ip(-mv[0], -mv[1])
+        if  not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self._img = self._imgs[tuple(sum_mv)]  # 押されたキーに該当する数値の合計
         screen.blit(self._img, self._rct)
 
 
@@ -132,7 +144,6 @@ class Beam:
         ## 画面外に出たら生成したオブジェクトを削除する(オプション) ##
         if self._rct.left > WIDTH:
             del self
-        
 
 
 def main():
