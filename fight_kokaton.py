@@ -25,6 +25,34 @@ def check_bound(area: pg.Rect, obj: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
+
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self):
+        """
+        スコア表示用のフォントを生成する
+        """
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.score = 0
+        self.img = self.font.render(f"スコア: + {str(self.score)}", 0, (0, 0, 255))
+        self.rct = self.img.get_rect()
+        self.rct.bottomleft = (100, HEIGHT - 50)
+
+    def update(self, screen: pg.Surface, score: int):        
+        """
+        現在のスコアを表示させる文字列Surfaceの生成
+        引数1 screen：画面Surface
+        """
+        print(score)
+        print(self.score)
+        self.score += score
+        self.img = self.font.render(f"スコア:{str(self.score)}", 0, (0, 0, 255))
+        screen.blit(self.img, self.rct)
+        
+
+
 class Bird:
     """
     ゲームキャラクター（こうかとん）に関するクラス
@@ -160,6 +188,10 @@ def main():
     bird = Bird(3, (900, 400))
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
     beam = None
+    score = Score()
+    #score.update(screen, 0)
+    x = 0
+    
 
     tmr = 0  
     while True:
@@ -170,7 +202,12 @@ def main():
                 beam = Beam(bird)
         
         tmr += 1
+        
         screen.blit(bg_img, [0, 0])
+
+        score.update(screen, x)
+        x = 0
+
         
         for bomb in bombs:
             bomb.update(screen)
@@ -192,6 +229,7 @@ def main():
                     beam = None
                     del bombs[i]
                     bird.change_img(6, screen)
+                    x = 1
                     break
 
         pg.display.update()
