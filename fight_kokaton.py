@@ -25,7 +25,6 @@ def check_bound(area: pg.Rect, obj: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
-
 class Score:
     """
     スコアに関するクラス
@@ -50,7 +49,6 @@ class Score:
         self.score += score
         self.img = self.font.render(f"スコア:{str(self.score)}", 0, (0, 0, 255))
         screen.blit(self.img, self.rct)
-        
 
 
 class Bird:
@@ -191,9 +189,8 @@ def main():
     score = Score()
     #score.update(screen, 0)
     x = 0
+    tmr = 0 
     
-
-    tmr = 0  
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -208,7 +205,6 @@ def main():
         score.update(screen, x)
         x = 0
 
-        
         for bomb in bombs:
             bomb.update(screen)
             if bird._rct.colliderect(bomb._rct):    
